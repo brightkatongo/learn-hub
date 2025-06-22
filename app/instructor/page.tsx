@@ -1,76 +1,110 @@
+"use client"
+
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Upload, Video, Users, DollarSign, TrendingUp, Eye, Star, Edit, Trash2, Plus } from "lucide-react"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { BookOpen, Users, DollarSign, Plus, Edit, Eye, BarChart3, Star, Settings, LogOut } from "lucide-react"
 import Link from "next/link"
-import Image from "next/image"
+import { useRouter } from "next/navigation"
 
 export default function InstructorDashboard() {
-  const instructorStats = {
-    totalStudents: 15420,
-    totalRevenue: 45680,
-    totalCourses: 8,
-    averageRating: 4.7,
-    monthlyEarnings: 8950,
-    newEnrollments: 234,
+  const [user, setUser] = useState({
+    name: "Sarah Johnson",
+    email: "sarah@example.com",
+    avatar: "/placeholder.svg?height=40&width=40",
+    userType: "instructor",
+  })
+  const router = useRouter()
+
+  useEffect(() => {
+    // Check if user is authenticated and is an instructor
+    const token = localStorage.getItem("access_token")
+    if (!token) {
+      router.push("/login")
+    }
+  }, [router])
+
+  const handleLogout = () => {
+    localStorage.removeItem("access_token")
+    router.push("/")
   }
 
-  const courses = [
+  const instructorCourses = [
     {
       id: 1,
       title: "Complete React Developer Course",
-      status: "Published",
       students: 12543,
       rating: 4.8,
-      revenue: 18500,
-      lastUpdated: "2 days ago",
-      image: "/placeholder.svg?height=100&width=150",
+      reviews: 2543,
+      revenue: 125430,
+      status: "Published",
+      thumbnail: "/placeholder.svg?height=100&width=150",
+      lastUpdated: "Dec 15, 2024",
     },
     {
       id: 2,
-      title: "Advanced JavaScript Concepts",
-      status: "Draft",
-      students: 0,
-      rating: 0,
-      revenue: 0,
-      lastUpdated: "1 week ago",
-      image: "/placeholder.svg?height=100&width=150",
+      title: "Advanced React Patterns",
+      students: 3421,
+      rating: 4.9,
+      reviews: 876,
+      revenue: 34210,
+      status: "Published",
+      thumbnail: "/placeholder.svg?height=100&width=150",
+      lastUpdated: "Dec 10, 2024",
     },
     {
       id: 3,
-      title: "Node.js Backend Development",
-      status: "Published",
-      students: 2877,
-      rating: 4.6,
-      revenue: 12300,
-      lastUpdated: "5 days ago",
-      image: "/placeholder.svg?height=100&width=150",
+      title: "React Testing Fundamentals",
+      students: 0,
+      rating: 0,
+      reviews: 0,
+      revenue: 0,
+      status: "Draft",
+      thumbnail: "/placeholder.svg?height=100&width=150",
+      lastUpdated: "Dec 20, 2024",
     },
   ]
 
+  const recentActivity = [
+    { type: "enrollment", message: "New student enrolled in React Course", time: "2 hours ago" },
+    { type: "review", message: "New 5-star review received", time: "4 hours ago" },
+    { type: "question", message: "Student asked a question in Chapter 5", time: "6 hours ago" },
+    { type: "completion", message: "Student completed your course", time: "1 day ago" },
+  ]
+
+  const stats = {
+    totalStudents: 15964,
+    totalRevenue: 159640,
+    totalCourses: 3,
+    avgRating: 4.85,
+  }
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="border-b bg-white sticky top-0 z-50">
+      <header className="bg-white border-b">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <Link href="/" className="text-2xl font-bold text-primary">
               LearnHub
             </Link>
+
             <div className="flex items-center space-x-4">
-              <Button variant="outline" asChild>
-                <Link href="/courses">Student View</Link>
+              <Button variant="ghost" size="sm">
+                <Settings className="h-4 w-4" />
               </Button>
-              <Button asChild>
-                <Link href="/instructor/course/new">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Create Course
-                </Link>
+              <div className="flex items-center space-x-2">
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src={user.avatar || "/placeholder.svg"} />
+                  <AvatarFallback>SJ</AvatarFallback>
+                </Avatar>
+                <span className="text-sm font-medium">{user.name}</span>
+              </div>
+              <Button variant="ghost" size="sm" onClick={handleLogout}>
+                <LogOut className="h-4 w-4" />
               </Button>
             </div>
           </div>
@@ -78,140 +112,138 @@ export default function InstructorDashboard() {
       </header>
 
       <div className="container mx-auto px-4 py-8">
-        {/* Welcome Section */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Instructor Dashboard</h1>
-          <p className="text-muted-foreground">Manage your courses and track your teaching success</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Instructor Dashboard</h1>
+          <p className="text-gray-600">Manage your courses and track your teaching performance</p>
         </div>
 
-        {/* Stats Overview */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <Card>
-            <CardContent className="p-4 text-center">
-              <Users className="w-8 h-8 mx-auto mb-2 text-blue-500" />
-              <div className="text-2xl font-bold">{instructorStats.totalStudents.toLocaleString()}</div>
-              <div className="text-xs text-muted-foreground">Total Students</div>
+            <CardContent className="p-6">
+              <div className="flex items-center">
+                <Users className="h-8 w-8 text-blue-600" />
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Total Students</p>
+                  <p className="text-2xl font-bold text-gray-900">{stats.totalStudents.toLocaleString()}</p>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-4 text-center">
-              <DollarSign className="w-8 h-8 mx-auto mb-2 text-green-500" />
-              <div className="text-2xl font-bold">${instructorStats.totalRevenue.toLocaleString()}</div>
-              <div className="text-xs text-muted-foreground">Total Revenue</div>
+            <CardContent className="p-6">
+              <div className="flex items-center">
+                <DollarSign className="h-8 w-8 text-green-600" />
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Total Revenue</p>
+                  <p className="text-2xl font-bold text-gray-900">${stats.totalRevenue.toLocaleString()}</p>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-4 text-center">
-              <Video className="w-8 h-8 mx-auto mb-2 text-purple-500" />
-              <div className="text-2xl font-bold">{instructorStats.totalCourses}</div>
-              <div className="text-xs text-muted-foreground">Total Courses</div>
+            <CardContent className="p-6">
+              <div className="flex items-center">
+                <BookOpen className="h-8 w-8 text-purple-600" />
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Total Courses</p>
+                  <p className="text-2xl font-bold text-gray-900">{stats.totalCourses}</p>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-4 text-center">
-              <Star className="w-8 h-8 mx-auto mb-2 text-yellow-500" />
-              <div className="text-2xl font-bold">{instructorStats.averageRating}</div>
-              <div className="text-xs text-muted-foreground">Avg Rating</div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4 text-center">
-              <TrendingUp className="w-8 h-8 mx-auto mb-2 text-orange-500" />
-              <div className="text-2xl font-bold">${instructorStats.monthlyEarnings.toLocaleString()}</div>
-              <div className="text-xs text-muted-foreground">This Month</div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4 text-center">
-              <Eye className="w-8 h-8 mx-auto mb-2 text-red-500" />
-              <div className="text-2xl font-bold">{instructorStats.newEnrollments}</div>
-              <div className="text-xs text-muted-foreground">New This Week</div>
+            <CardContent className="p-6">
+              <div className="flex items-center">
+                <Star className="h-8 w-8 text-yellow-600" />
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Avg. Rating</p>
+                  <p className="text-2xl font-bold text-gray-900">{stats.avgRating}</p>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>
 
-        <Tabs defaultValue="courses" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+        <Tabs defaultValue="courses" className="space-y-6">
+          <TabsList>
             <TabsTrigger value="courses">My Courses</TabsTrigger>
-            <TabsTrigger value="create">Create Course</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
-            <TabsTrigger value="earnings">Earnings</TabsTrigger>
+            <TabsTrigger value="students">Students</TabsTrigger>
+            <TabsTrigger value="reviews">Reviews</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="courses" className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold">Your Courses</h2>
-              <Button asChild>
-                <Link href="/instructor/course/new">
-                  <Plus className="w-4 h-4 mr-2" />
-                  New Course
-                </Link>
+          <TabsContent value="courses" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold">My Courses</h2>
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                Create New Course
               </Button>
             </div>
 
-            <div className="space-y-4">
-              {courses.map((course) => (
+            <div className="grid gap-6">
+              {instructorCourses.map((course) => (
                 <Card key={course.id}>
                   <CardContent className="p-0">
                     <div className="flex">
-                      <Image
-                        src={course.image || "/placeholder.svg"}
-                        alt={course.title}
-                        width={150}
-                        height={100}
-                        className="object-cover"
-                      />
-                      <div className="flex-1 p-4">
-                        <div className="flex justify-between items-start mb-2">
-                          <div>
-                            <h3 className="font-semibold mb-1">{course.title}</h3>
-                            <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+                      <div className="w-48 h-32 bg-gray-200 flex-shrink-0">
+                        <img
+                          src={course.thumbnail || "/placeholder.svg"}
+                          alt={course.title}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="flex-1 p-6">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <h3 className="text-xl font-semibold">{course.title}</h3>
                               <Badge variant={course.status === "Published" ? "default" : "secondary"}>
                                 {course.status}
                               </Badge>
-                              <span>Updated {course.lastUpdated}</span>
                             </div>
-                          </div>
-                          <div className="flex space-x-2">
-                            <Button size="sm" variant="outline">
-                              <Edit className="w-4 h-4 mr-2" />
-                              Edit
-                            </Button>
-                            <Button size="sm" variant="outline">
-                              <Eye className="w-4 h-4 mr-2" />
-                              Preview
-                            </Button>
-                            <Button size="sm" variant="outline" className="text-red-600">
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </div>
 
-                        <div className="grid grid-cols-4 gap-4 text-sm">
-                          <div>
-                            <div className="font-semibold">{course.students.toLocaleString()}</div>
-                            <div className="text-muted-foreground">Students</div>
-                          </div>
-                          <div>
-                            <div className="font-semibold flex items-center">
-                              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400 mr-1" />
-                              {course.rating || "N/A"}
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                              <div>
+                                <p className="text-sm text-gray-600">Students</p>
+                                <p className="font-semibold">{course.students.toLocaleString()}</p>
+                              </div>
+                              <div>
+                                <p className="text-sm text-gray-600">Rating</p>
+                                <div className="flex items-center">
+                                  <Star className="w-4 h-4 fill-yellow-400 text-yellow-400 mr-1" />
+                                  <span className="font-semibold">{course.rating}</span>
+                                  <span className="text-sm text-gray-600 ml-1">({course.reviews})</span>
+                                </div>
+                              </div>
+                              <div>
+                                <p className="text-sm text-gray-600">Revenue</p>
+                                <p className="font-semibold">${course.revenue.toLocaleString()}</p>
+                              </div>
+                              <div>
+                                <p className="text-sm text-gray-600">Last Updated</p>
+                                <p className="font-semibold">{course.lastUpdated}</p>
+                              </div>
                             </div>
-                            <div className="text-muted-foreground">Rating</div>
-                          </div>
-                          <div>
-                            <div className="font-semibold">${course.revenue.toLocaleString()}</div>
-                            <div className="text-muted-foreground">Revenue</div>
-                          </div>
-                          <div>
-                            <Button size="sm" className="w-full" asChild>
-                              <Link href={`/instructor/courses/${course.id}`}>Manage</Link>
-                            </Button>
+
+                            <div className="flex gap-2">
+                              <Button size="sm" variant="outline">
+                                <Edit className="mr-2 h-4 w-4" />
+                                Edit
+                              </Button>
+                              <Button size="sm" variant="outline">
+                                <Eye className="mr-2 h-4 w-4" />
+                                Preview
+                              </Button>
+                              <Button size="sm" variant="outline">
+                                <BarChart3 className="mr-2 h-4 w-4" />
+                                Analytics
+                              </Button>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -222,278 +254,137 @@ export default function InstructorDashboard() {
             </div>
           </TabsContent>
 
-          <TabsContent value="create" className="space-y-6">
+          <TabsContent value="analytics" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Create New Course</CardTitle>
-                <CardDescription>Fill in the basic information to get started with your new course</CardDescription>
+                <CardTitle>Performance Analytics</CardTitle>
+                <CardDescription>Track your teaching performance and student engagement</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="title">Course Title</Label>
-                    <Input id="title" placeholder="Enter course title" />
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-blue-600 mb-2">1,234</div>
+                    <div className="text-sm text-gray-600">New Students This Month</div>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="category">Category</Label>
-                    <Select>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="web-dev">Web Development</SelectItem>
-                        <SelectItem value="data-science">Data Science</SelectItem>
-                        <SelectItem value="design">Design</SelectItem>
-                        <SelectItem value="business">Business</SelectItem>
-                        <SelectItem value="marketing">Marketing</SelectItem>
-                      </SelectContent>
-                    </Select>
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-green-600 mb-2">$12,450</div>
+                    <div className="text-sm text-gray-600">Revenue This Month</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-purple-600 mb-2">89%</div>
+                    <div className="text-sm text-gray-600">Course Completion Rate</div>
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="description">Course Description</Label>
-                  <Textarea id="description" placeholder="Describe what students will learn in this course" rows={4} />
-                </div>
-
-                <div className="grid md:grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="level">Difficulty Level</Label>
-                    <Select>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select level" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="beginner">Beginner</SelectItem>
-                        <SelectItem value="intermediate">Intermediate</SelectItem>
-                        <SelectItem value="advanced">Advanced</SelectItem>
-                        <SelectItem value="all">All Levels</SelectItem>
-                      </SelectContent>
-                    </Select>
+                <div className="h-64 bg-gray-100 rounded-lg flex items-center justify-center">
+                  <div className="text-center">
+                    <BarChart3 className="h-12 w-12 text-gray-400 mx-auto mb-2" />
+                    <p className="text-gray-500">Analytics charts would be displayed here</p>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="language">Language</Label>
-                    <Select>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select language" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="english">English</SelectItem>
-                        <SelectItem value="spanish">Spanish</SelectItem>
-                        <SelectItem value="french">French</SelectItem>
-                        <SelectItem value="german">German</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="price">Price ($)</Label>
-                    <Input id="price" type="number" placeholder="0.00" />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Course Thumbnail</Label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                    <Upload className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                    <p className="text-sm text-muted-foreground mb-2">Upload course thumbnail (1280x720 recommended)</p>
-                    <Button variant="outline" size="sm">
-                      Choose File
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="flex space-x-4">
-                  <Button>Create Course</Button>
-                  <Button variant="outline">Save as Draft</Button>
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
 
-          <TabsContent value="analytics" className="space-y-6">
-            <div className="grid md:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Student Enrollment Trends</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-64 flex items-center justify-center text-muted-foreground">
-                    📈 Enrollment chart would go here
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Revenue Analytics</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-64 flex items-center justify-center text-muted-foreground">
-                    💰 Revenue chart would go here
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Course Performance</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {courses
-                      .filter((c) => c.status === "Published")
-                      .map((course) => (
-                        <div key={course.id} className="flex justify-between items-center p-3 bg-gray-50 rounded">
-                          <div>
-                            <h4 className="font-medium">{course.title}</h4>
-                            <p className="text-sm text-muted-foreground">
-                              {course.students} students • {course.rating} rating
-                            </p>
-                          </div>
-                          <div className="text-right">
-                            <div className="font-semibold">${course.revenue.toLocaleString()}</div>
-                            <div className="text-sm text-muted-foreground">Revenue</div>
-                          </div>
-                        </div>
-                      ))}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Student Feedback</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm">5 stars</span>
-                      <div className="flex-1 mx-3 bg-gray-200 rounded-full h-2">
-                        <div className="bg-yellow-400 h-2 rounded-full" style={{ width: "75%" }}></div>
-                      </div>
-                      <span className="text-sm">75%</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm">4 stars</span>
-                      <div className="flex-1 mx-3 bg-gray-200 rounded-full h-2">
-                        <div className="bg-yellow-400 h-2 rounded-full" style={{ width: "20%" }}></div>
-                      </div>
-                      <span className="text-sm">20%</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm">3 stars</span>
-                      <div className="flex-1 mx-3 bg-gray-200 rounded-full h-2">
-                        <div className="bg-yellow-400 h-2 rounded-full" style={{ width: "3%" }}></div>
-                      </div>
-                      <span className="text-sm">3%</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm">2 stars</span>
-                      <div className="flex-1 mx-3 bg-gray-200 rounded-full h-2">
-                        <div className="bg-yellow-400 h-2 rounded-full" style={{ width: "1%" }}></div>
-                      </div>
-                      <span className="text-sm">1%</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm">1 star</span>
-                      <div className="flex-1 mx-3 bg-gray-200 rounded-full h-2">
-                        <div className="bg-yellow-400 h-2 rounded-full" style={{ width: "1%" }}></div>
-                      </div>
-                      <span className="text-sm">1%</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="earnings" className="space-y-6">
-            <div className="grid md:grid-cols-3 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>This Month</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold text-green-600 mb-2">
-                    ${instructorStats.monthlyEarnings.toLocaleString()}
-                  </div>
-                  <p className="text-sm text-muted-foreground">+15% from last month</p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Total Earnings</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold mb-2">${instructorStats.totalRevenue.toLocaleString()}</div>
-                  <p className="text-sm text-muted-foreground">All time earnings</p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Pending Payout</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold text-orange-600 mb-2">$2,450</div>
-                  <p className="text-sm text-muted-foreground">Available Dec 30</p>
-                </CardContent>
-              </Card>
-            </div>
-
+          <TabsContent value="students" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Recent Transactions</CardTitle>
+                <CardTitle>Student Management</CardTitle>
+                <CardDescription>View and manage your students</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {[
-                    {
-                      course: "Complete React Developer Course",
-                      amount: 89.99,
-                      date: "Dec 21, 2024",
-                      student: "John Doe",
-                    },
-                    {
-                      course: "Node.js Backend Development",
-                      amount: 79.99,
-                      date: "Dec 21, 2024",
-                      student: "Jane Smith",
-                    },
-                    {
-                      course: "Complete React Developer Course",
-                      amount: 89.99,
-                      date: "Dec 20, 2024",
-                      student: "Mike Johnson",
-                    },
-                    {
-                      course: "Node.js Backend Development",
-                      amount: 79.99,
-                      date: "Dec 20, 2024",
-                      student: "Sarah Wilson",
-                    },
-                  ].map((transaction, index) => (
-                    <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded">
-                      <div>
-                        <h4 className="font-medium">{transaction.course}</h4>
-                        <p className="text-sm text-muted-foreground">
-                          Purchased by {transaction.student} on {transaction.date}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <div className="font-semibold text-green-600">+${transaction.amount}</div>
-                        <div className="text-xs text-muted-foreground">
-                          Your share: ${(transaction.amount * 0.7).toFixed(2)}
+                  <div className="text-center py-8">
+                    <Users className="h-12 w-12 text-gray-400 mx-auto mb-2" />
+                    <p className="text-gray-500">Student management features would be displayed here</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="reviews" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Recent Reviews</CardTitle>
+                <CardDescription>See what your students are saying about your courses</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="border-b pb-4">
+                    <div className="flex items-start space-x-4">
+                      <Avatar>
+                        <AvatarImage src="/placeholder.svg?height=40&width=40" />
+                        <AvatarFallback>JD</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-semibold">John Doe</h4>
+                          <span className="text-sm text-gray-500">2 days ago</span>
                         </div>
+                        <div className="flex items-center mb-2">
+                          {[...Array(5)].map((_, i) => (
+                            <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                          ))}
+                        </div>
+                        <p className="text-sm text-gray-600">
+                          "Excellent course! Sarah explains everything clearly and the projects are very practical."
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">Complete React Developer Course</p>
                       </div>
                     </div>
-                  ))}
+                  </div>
+
+                  <div className="border-b pb-4">
+                    <div className="flex items-start space-x-4">
+                      <Avatar>
+                        <AvatarImage src="/placeholder.svg?height=40&width=40" />
+                        <AvatarFallback>JS</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-semibold">Jane Smith</h4>
+                          <span className="text-sm text-gray-500">1 week ago</span>
+                        </div>
+                        <div className="flex items-center mb-2">
+                          {[...Array(4)].map((_, i) => (
+                            <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                          ))}
+                          <Star className="w-4 h-4 text-gray-300" />
+                        </div>
+                        <p className="text-sm text-gray-600">
+                          "Great content and well-structured. The instructor is knowledgeable."
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">Advanced React Patterns</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Recent Activity */}
+        <Card className="mt-8">
+          <CardHeader>
+            <CardTitle>Recent Activity</CardTitle>
+            <CardDescription>Stay updated with the latest activities in your courses</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {recentActivity.map((activity, index) => (
+                <div key={index} className="flex items-center space-x-4 p-3 bg-gray-50 rounded-lg">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                  <div className="flex-1">
+                    <p className="text-sm">{activity.message}</p>
+                    <p className="text-xs text-gray-500">{activity.time}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )
