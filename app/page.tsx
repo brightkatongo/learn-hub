@@ -1,346 +1,355 @@
+"use client"
+
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
-import { Star, Play, Users, Clock, Search, BookOpen, Award, TrendingUp } from "lucide-react"
+import { EnhancedCard } from "@/components/ui/enhanced-card"
+import { CurrencySelector } from "@/components/ui/currency-selector"
+import { PaymentModal } from "@/components/ui/payment-modal"
+import { detectUserCurrency } from "@/lib/currency"
+import { useAuth } from "@/components/auth-provider"
+import {
+  Search,
+  BookOpen,
+  Users,
+  Award,
+  TrendingUp,
+  ChevronRight,
+  Globe,
+  Smartphone,
+  Clock,
+  CheckCircle,
+} from "lucide-react"
 import Link from "next/link"
-import Image from "next/image"
+import { useRouter } from "next/navigation"
+import { useToast } from "@/hooks/use-toast"
 
 export default function HomePage() {
+  const [currency, setCurrency] = useState("USD")
+  const [searchQuery, setSearchQuery] = useState("")
+  const [selectedCourse, setSelectedCourse] = useState<any>(null)
+  const [showPaymentModal, setShowPaymentModal] = useState(false)
+  const { user } = useAuth()
+  const router = useRouter()
+  const { toast } = useToast()
+
+  useEffect(() => {
+    setCurrency(detectUserCurrency())
+  }, [])
+
   const featuredCourses = [
     {
       id: 1,
-      title: "Complete React Developer Course",
+      title: "Complete Web Development Bootcamp",
       instructor: "Sarah Johnson",
-      rating: 4.8,
-      students: 12543,
-      duration: "42 hours",
+      rating: 4.9,
+      reviews: 3245,
+      students: 15678,
+      duration: "52 hours",
       price: 89.99,
       originalPrice: 199.99,
       image: "/placeholder.svg?height=200&width=300",
       category: "Web Development",
       level: "Beginner to Advanced",
+      bestseller: true,
+      description: "Learn HTML, CSS, JavaScript, React, Node.js and build real-world projects",
+      lessons: 156,
+      certificate: true,
     },
     {
       id: 2,
-      title: "Machine Learning Masterclass",
-      instructor: "Dr. Michael Chen",
-      rating: 4.9,
+      title: "Digital Marketing for African Businesses",
+      instructor: "Kwame Asante",
+      rating: 4.8,
+      reviews: 1876,
       students: 8932,
-      duration: "38 hours",
-      price: 94.99,
-      originalPrice: 179.99,
+      duration: "28 hours",
+      price: 59.99,
+      originalPrice: 129.99,
       image: "/placeholder.svg?height=200&width=300",
-      category: "Data Science",
-      level: "Intermediate",
+      category: "Marketing",
+      level: "Beginner",
+      bestseller: true,
+      description: "Master digital marketing strategies tailored for African markets",
+      lessons: 89,
+      certificate: true,
     },
     {
       id: 3,
-      title: "UI/UX Design Fundamentals",
-      instructor: "Emma Rodriguez",
+      title: "Mobile App Development with React Native",
+      instructor: "Amina Kone",
       rating: 4.7,
-      students: 15678,
-      duration: "28 hours",
-      price: 69.99,
-      originalPrice: 149.99,
+      reviews: 2156,
+      students: 11234,
+      duration: "45 hours",
+      price: 79.99,
+      originalPrice: 159.99,
       image: "/placeholder.svg?height=200&width=300",
-      category: "Design",
-      level: "Beginner",
+      category: "Mobile Development",
+      level: "Intermediate",
+      bestseller: false,
+      description: "Build cross-platform mobile apps for iOS and Android",
+      lessons: 124,
+      certificate: true,
     },
   ]
 
-  const categories = [
-    { name: "Web Development", courses: 1250, icon: "💻" },
-    { name: "Data Science", courses: 890, icon: "📊" },
-    { name: "Design", courses: 650, icon: "🎨" },
-    { name: "Business", courses: 1100, icon: "💼" },
-    { name: "Marketing", courses: 780, icon: "📈" },
-    { name: "Photography", courses: 420, icon: "📸" },
+  const stats = [
+    { icon: BookOpen, label: "Courses", value: "500+", color: "text-blue-600" },
+    { icon: Users, label: "Students", value: "50K+", color: "text-green-600" },
+    { icon: Award, label: "Certificates", value: "25K+", color: "text-yellow-600" },
+    { icon: TrendingUp, label: "Success Rate", value: "95%", color: "text-purple-600" },
   ]
 
+  const features = [
+    {
+      icon: Globe,
+      title: "Learn Anywhere",
+      description: "Access courses from anywhere in Africa and beyond with offline support",
+    },
+    {
+      icon: Smartphone,
+      title: "Mobile-First",
+      description: "Optimized for mobile learning with data-efficient streaming",
+    },
+    {
+      icon: Clock,
+      title: "Flexible Schedule",
+      description: "Learn at your own pace with lifetime access to course materials",
+    },
+    {
+      icon: CheckCircle,
+      title: "Certified Learning",
+      description: "Earn industry-recognized certificates upon course completion",
+    },
+  ]
+
+  const handleEnroll = (course: any) => {
+    if (!user) {
+      toast({
+        title: "Please sign in",
+        description: "You need to sign in to enroll in courses",
+      })
+      router.push("/login")
+      return
+    }
+
+    setSelectedCourse(course)
+    setShowPaymentModal(true)
+  }
+
+  const handlePaymentSuccess = () => {
+    toast({
+      title: "Enrollment successful!",
+      description: `You've successfully enrolled in ${selectedCourse?.title}`,
+    })
+    router.push("/dashboard")
+  }
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {/* Header */}
-      <header className="border-b bg-white sticky top-0 z-50">
+      <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-8">
-              <Link href="/" className="text-2xl font-bold text-primary">
-                LearnHub
+            <Link
+              href="/"
+              className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"
+            >
+              LearnHub
+            </Link>
+
+            <div className="hidden md:flex items-center space-x-8">
+              <Link href="/courses" className="text-gray-700 hover:text-primary transition-colors">
+                Courses
               </Link>
-              <nav className="hidden md:flex space-x-6">
-                <Link href="/courses" className="text-muted-foreground hover:text-foreground">
-                  Courses
-                </Link>
-                <Link href="/categories" className="text-muted-foreground hover:text-foreground">
-                  Categories
-                </Link>
-                <Link href="/instructors" className="text-muted-foreground hover:text-foreground">
-                  Instructors
-                </Link>
-              </nav>
+              <Link href="/about" className="text-gray-700 hover:text-primary transition-colors">
+                About
+              </Link>
+              <Link href="/contact" className="text-gray-700 hover:text-primary transition-colors">
+                Contact
+              </Link>
             </div>
 
             <div className="flex items-center space-x-4">
-              <div className="relative hidden md:block">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                <Input placeholder="Search courses..." className="pl-10 w-80" />
-              </div>
-              <Button variant="outline" asChild>
-                <Link href="/login">Login</Link>
-              </Button>
-              <Button asChild>
-                <Link href="/signup">Sign Up</Link>
-              </Button>
+              <CurrencySelector selectedCurrency={currency} onCurrencyChange={setCurrency} />
+
+              {user ? (
+                <Button asChild>
+                  <Link href="/dashboard">Dashboard</Link>
+                </Button>
+              ) : (
+                <div className="flex items-center space-x-2">
+                  <Button variant="outline" asChild>
+                    <Link href="/login">Sign In</Link>
+                  </Button>
+                  <Button asChild>
+                    <Link href="/signup">Get Started</Link>
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </header>
 
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-blue-600 to-purple-700 text-white py-20">
-        <div className="container mx-auto px-4 text-center">
-          <h1 className="text-5xl font-bold mb-6">Learn Without Limits</h1>
-          <p className="text-xl mb-8 max-w-2xl mx-auto">
-            Start, switch, or advance your career with more than 5,000 courses, Professional Certificates, and degrees
-            from world-class universities and companies.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100">
-              <BookOpen className="mr-2 h-5 w-5" />
-              Explore Courses
-            </Button>
-            <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-blue-600">
-              <Play className="mr-2 h-5 w-5" />
-              Watch Demo
+      <section className="py-20 px-4">
+        <div className="container mx-auto text-center">
+          <div className="max-w-4xl mx-auto">
+            <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-blue-600 via-purple-600 to-teal-600 bg-clip-text text-transparent">
+              Learn Skills That Matter
+            </h1>
+            <p className="text-xl md:text-2xl text-gray-600 mb-8 leading-relaxed">
+              Join Africa's premier online learning platform. Master in-demand skills from expert instructors and
+              advance your career with courses designed for the modern world.
+            </p>
+
+            {/* Search Bar */}
+            <div className="max-w-2xl mx-auto mb-8">
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <Input
+                  placeholder="What do you want to learn today?"
+                  className="pl-12 pr-4 py-4 text-lg border-2 border-gray-200 focus:border-primary rounded-full"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                <Button
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 rounded-full px-6"
+                  onClick={() => router.push(`/courses?search=${searchQuery}`)}
+                >
+                  Search
+                </Button>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap justify-center gap-4 mb-12">
+              <Badge variant="secondary" className="px-4 py-2 text-sm">
+                🌍 Available in Local Languages
+              </Badge>
+              <Badge variant="secondary" className="px-4 py-2 text-sm">
+                📱 Mobile Money Payments
+              </Badge>
+              <Badge variant="secondary" className="px-4 py-2 text-sm">
+                🎓 Industry Certificates
+              </Badge>
+            </div>
+
+            <Button
+              size="lg"
+              className="text-lg px-8 py-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-200"
+              asChild
+            >
+              <Link href="/courses">
+                Explore Courses
+                <ChevronRight className="ml-2 h-5 w-5" />
+              </Link>
             </Button>
           </div>
         </div>
       </section>
 
       {/* Stats Section */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            <div>
-              <div className="text-3xl font-bold text-primary mb-2">50K+</div>
-              <div className="text-muted-foreground">Students</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-primary mb-2">5K+</div>
-              <div className="text-muted-foreground">Courses</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-primary mb-2">1K+</div>
-              <div className="text-muted-foreground">Instructors</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-primary mb-2">95%</div>
-              <div className="text-muted-foreground">Success Rate</div>
-            </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {stats.map((stat, index) => (
+              <div key={index} className="text-center">
+                <div className={`inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4`}>
+                  <stat.icon className={`h-8 w-8 ${stat.color}`} />
+                </div>
+                <div className="text-3xl font-bold text-gray-900 mb-2">{stat.value}</div>
+                <div className="text-gray-600">{stat.label}</div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* Featured Courses */}
-      <section className="py-16">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-3xl font-bold">Featured Courses</h2>
-            <Button variant="outline" asChild>
-              <Link href="/courses">View All Courses</Link>
+      <section className="py-20 px-4">
+        <div className="container mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold mb-4">Featured Courses</h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Discover our most popular courses, carefully selected to help you build the skills employers are looking
+              for
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+            {featuredCourses.map((course) => (
+              <EnhancedCard key={course.id} course={course} currency={currency} onEnroll={handleEnroll} />
+            ))}
+          </div>
+
+          <div className="text-center">
+            <Button size="lg" variant="outline" asChild>
+              <Link href="/courses">
+                View All Courses
+                <ChevronRight className="ml-2 h-5 w-5" />
+              </Link>
             </Button>
           </div>
+        </div>
+      </section>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featuredCourses.map((course) => (
-              <Card key={course.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                <div className="relative">
-                  <Image
-                    src={course.image || "/placeholder.svg"}
-                    alt={course.title}
-                    width={300}
-                    height={200}
-                    className="w-full h-48 object-cover"
-                  />
-                  <Badge className="absolute top-2 left-2 bg-primary">{course.category}</Badge>
-                  <div className="absolute inset-0 bg-black/20 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <Button size="sm" className="bg-white text-black hover:bg-gray-100">
-                      <Play className="mr-2 h-4 w-4" />
-                      Preview
-                    </Button>
-                  </div>
+      {/* Features Section */}
+      <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold mb-4">Why Choose LearnHub?</h2>
+            <p className="text-xl opacity-90 max-w-2xl mx-auto">
+              We're built for African learners, with features that work in your environment
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {features.map((feature, index) => (
+              <div key={index} className="text-center">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm mb-6">
+                  <feature.icon className="h-8 w-8" />
                 </div>
-
-                <CardHeader>
-                  <CardTitle className="line-clamp-2">{course.title}</CardTitle>
-                  <CardDescription>by {course.instructor}</CardDescription>
-                </CardHeader>
-
-                <CardContent>
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
-                    <div className="flex items-center">
-                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400 mr-1" />
-                      {course.rating}
-                    </div>
-                    <div className="flex items-center">
-                      <Users className="w-4 h-4 mr-1" />
-                      {course.students.toLocaleString()}
-                    </div>
-                    <div className="flex items-center">
-                      <Clock className="w-4 h-4 mr-1" />
-                      {course.duration}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="text-2xl font-bold">${course.price}</span>
-                      <span className="text-sm text-muted-foreground line-through ml-2">${course.originalPrice}</span>
-                    </div>
-                    <Button size="sm">Enroll Now</Button>
-                  </div>
-                </CardContent>
-              </Card>
+                <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
+                <p className="opacity-90">{feature.description}</p>
+              </div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Categories */}
-      <section className="py-16 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">Popular Categories</h2>
-
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-            {categories.map((category) => (
-              <Card key={category.name} className="text-center hover:shadow-md transition-shadow cursor-pointer">
-                <CardContent className="p-6">
-                  <div className="text-4xl mb-4">{category.icon}</div>
-                  <h3 className="font-semibold mb-2">{category.name}</h3>
-                  <p className="text-sm text-muted-foreground">{category.courses} courses</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Features */}
-      <section className="py-16">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">Why Choose LearnHub?</h2>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <BookOpen className="w-8 h-8 text-blue-600" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Expert Instructors</h3>
-              <p className="text-muted-foreground">Learn from industry experts and experienced professionals</p>
-            </div>
-
-            <div className="text-center">
-              <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Award className="w-8 h-8 text-green-600" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Certificates</h3>
-              <p className="text-muted-foreground">Earn certificates upon course completion to showcase your skills</p>
-            </div>
-
-            <div className="text-center">
-              <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <TrendingUp className="w-8 h-8 text-purple-600" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Career Growth</h3>
-              <p className="text-muted-foreground">Advance your career with in-demand skills and knowledge</p>
-            </div>
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 bg-primary text-white">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-4">Ready to Start Learning?</h2>
-          <p className="text-xl mb-8 max-w-2xl mx-auto">Join thousands of students already learning on LearnHub</p>
-          <Button size="lg" className="bg-white text-primary hover:bg-gray-100">
-            Get Started Today
-          </Button>
+      <section className="py-20 px-4 bg-gray-50">
+        <div className="container mx-auto text-center">
+          <div className="max-w-3xl mx-auto">
+            <h2 className="text-4xl font-bold mb-6">Ready to Start Learning?</h2>
+            <p className="text-xl text-gray-600 mb-8">
+              Join thousands of students who are already building their future with LearnHub
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button size="lg" className="text-lg px-8 py-4" asChild>
+                <Link href="/signup">Start Learning Today</Link>
+              </Button>
+              <Button size="lg" variant="outline" className="text-lg px-8 py-4" asChild>
+                <Link href="/courses">Browse Courses</Link>
+              </Button>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-4 gap-8">
-            <div>
-              <h3 className="text-xl font-bold mb-4">LearnHub</h3>
-              <p className="text-gray-400">
-                Empowering learners worldwide with quality education and professional development.
-              </p>
-            </div>
-
-            <div>
-              <h4 className="font-semibold mb-4">Company</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li>
-                  <Link href="/about">About Us</Link>
-                </li>
-                <li>
-                  <Link href="/careers">Careers</Link>
-                </li>
-                <li>
-                  <Link href="/contact">Contact</Link>
-                </li>
-                <li>
-                  <Link href="/blog">Blog</Link>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-semibold mb-4">Support</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li>
-                  <Link href="/help">Help Center</Link>
-                </li>
-                <li>
-                  <Link href="/terms">Terms of Service</Link>
-                </li>
-                <li>
-                  <Link href="/privacy">Privacy Policy</Link>
-                </li>
-                <li>
-                  <Link href="/refund">Refund Policy</Link>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-semibold mb-4">Community</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li>
-                  <Link href="/instructors">Become an Instructor</Link>
-                </li>
-                <li>
-                  <Link href="/affiliates">Affiliate Program</Link>
-                </li>
-                <li>
-                  <Link href="/forums">Discussion Forums</Link>
-                </li>
-                <li>
-                  <Link href="/events">Events</Link>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 LearnHub. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+      {/* Payment Modal */}
+      {selectedCourse && (
+        <PaymentModal
+          isOpen={showPaymentModal}
+          onClose={() => setShowPaymentModal(false)}
+          course={selectedCourse}
+          currency={currency}
+          onPaymentSuccess={handlePaymentSuccess}
+        />
+      )}
     </div>
   )
 }

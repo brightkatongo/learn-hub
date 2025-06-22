@@ -37,6 +37,7 @@ LOCAL_APPS = [
     'accounts',
     'courses',
     'payments',
+    'mobile_payments',  # Added mobile payments app
     'analytics',
     'notifications',
 ]
@@ -102,7 +103,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Africa/Lusaka'  # Set to Zambian timezone
 USE_I18N = True
 USE_TZ = True
 
@@ -215,6 +216,17 @@ STRIPE_PUBLISHABLE_KEY = config('STRIPE_PUBLISHABLE_KEY', default='')
 STRIPE_SECRET_KEY = config('STRIPE_SECRET_KEY', default='')
 STRIPE_WEBHOOK_SECRET = config('STRIPE_WEBHOOK_SECRET', default='')
 
+# Mobile Money Configuration
+MOBILE_MONEY_SETTINGS = {
+    'AIRTEL_MERCHANT_CODE': config('AIRTEL_MERCHANT_CODE', default='LEARNHUB001'),
+    'ZAMTEL_BUSINESS_NUMBER': config('ZAMTEL_BUSINESS_NUMBER', default='2001'),
+    'MTN_PAYEE_CODE': config('MTN_PAYEE_CODE', default='LEARN001'),
+    'SMS_PROVIDER': config('SMS_PROVIDER', default='africas_talking'),
+    'PAYMENT_TIMEOUT_MINUTES': config('PAYMENT_TIMEOUT_MINUTES', default=30, cast=int),
+    'SMS_API_KEY': config('SMS_API_KEY', default=''),
+    'SMS_USERNAME': config('SMS_USERNAME', default=''),
+}
+
 # Logging Configuration
 LOGGING = {
     'version': 1,
@@ -234,6 +246,11 @@ LOGGING = {
         'django': {
             'handlers': ['file', 'console'],
             'level': 'INFO',
+            'propagate': True,
+        },
+        'mobile_payments': {
+            'handlers': ['file', 'console'],
+            'level': 'DEBUG',
             'propagate': True,
         },
     },
