@@ -24,6 +24,9 @@ export interface User {
   user_type: string
   avatar?: string
   is_verified: boolean
+  country?: string
+  city?: string
+  bio?: string
 }
 
 export interface AuthResponse {
@@ -55,9 +58,10 @@ class AuthService {
 
     const data = await response.json()
 
-    // Store tokens
+    // Store tokens and user info
     localStorage.setItem("access_token", data.access)
     localStorage.setItem("refresh_token", data.refresh)
+    localStorage.setItem("user", JSON.stringify(data.user))
 
     return data
   }
@@ -86,7 +90,25 @@ class AuthService {
       throw new Error("Failed to get user profile")
     }
 
-    return await response.json()
+    const user = await response.json()
+    localStorage.setItem("user", JSON.stringify(user))
+    return user
+  }
+
+  async updateProfile(userData: Partial<User>): Promise<User> {
+    const response = await fetch(`${API_BASE_URL}/auth/profile/`, {
+      method: "PATCH",
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify(userData),
+    })
+
+    if (!response.ok) {
+      throw new Error("Failed to update profile")
+    }
+
+    const user = await response.json()
+    localStorage.setItem("user", JSON.stringify(user))
+    return user
   }
 
   async refreshToken(): Promise<string> {
@@ -113,10 +135,21 @@ class AuthService {
   logout() {
     localStorage.removeItem("access_token")
     localStorage.removeItem("refresh_token")
+    localStorage.removeItem("user")
   }
 
   isAuthenticated(): boolean {
     return !!localStorage.getItem("access_token")
+  }
+
+  getCurrentUserFromStorage(): User | null {
+    const userStr = localStorage.getItem("user")
+    return userStr ? JSON.parse(userStr) : null
+  }
+
+  getUserRole(): string | null {
+    const user = this.getCurrentUserFromStorage()
+    return user?.user_type || null
   }
 }
 

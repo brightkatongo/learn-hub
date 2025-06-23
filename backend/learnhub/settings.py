@@ -16,6 +16,7 @@ ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=lamb
 
 # Application definition
 DJANGO_APPS = [
+    'jazzmin',  # Must be before django.contrib.admin
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -31,15 +32,23 @@ THIRD_PARTY_APPS = [
     'channels',
     'django_filters',
     'storages',
+    'import_export',
+    'debug_toolbar',
+    'silk',
+    'cleanup',
+    'widget_tweaks',
+    'bootstrap4',
+    'colorfield',
 ]
 
 LOCAL_APPS = [
     'accounts',
     'courses',
     'payments',
-    'mobile_payments',  # Added mobile payments app
+    'mobile_payments',
     'analytics',
     'notifications',
+    'dashboard',  # New dashboard app
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -55,6 +64,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django_ratelimit.middleware.RatelimitMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'silk.middleware.SilkyMiddleware',
 ]
 
 ROOT_URLCONF = 'learnhub.urls'
@@ -103,7 +114,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'Africa/Lusaka'  # Set to Zambian timezone
+TIME_ZONE = 'Africa/Lusaka'
 USE_I18N = True
 USE_TZ = True
 
@@ -225,6 +236,113 @@ MOBILE_MONEY_SETTINGS = {
     'PAYMENT_TIMEOUT_MINUTES': config('PAYMENT_TIMEOUT_MINUTES', default=30, cast=int),
     'SMS_API_KEY': config('SMS_API_KEY', default=''),
     'SMS_USERNAME': config('SMS_USERNAME', default=''),
+}
+
+# Debug Toolbar Configuration
+INTERNAL_IPS = [
+    '127.0.0.1',
+    'localhost',
+]
+
+# Jazzmin Configuration for Modern Admin UI
+JAZZMIN_SETTINGS = {
+    "site_title": "LearnHub Admin",
+    "site_header": "LearnHub",
+    "site_brand": "LearnHub",
+    "site_logo": "images/logo.png",
+    "login_logo": "images/logo.png",
+    "login_logo_dark": None,
+    "site_logo_classes": "img-circle",
+    "site_icon": "images/favicon.ico",
+    "welcome_sign": "Welcome to LearnHub Admin",
+    "copyright": "LearnHub Ltd",
+    "search_model": ["accounts.User", "courses.Course"],
+    "user_avatar": None,
+    
+    # Top Menu
+    "topmenu_links": [
+        {"name": "Home", "url": "admin:index", "permissions": ["auth.view_user"]},
+        {"name": "Dashboard", "url": "/admin/dashboard/", "permissions": ["auth.view_user"]},
+        {"name": "Analytics", "url": "/admin/analytics/", "permissions": ["auth.view_user"]},
+        {"model": "accounts.User"},
+        {"app": "courses"},
+    ],
+
+    # User Menu on the right side
+    "usermenu_links": [
+        {"name": "Support", "url": "https://github.com/farridav/django-jazzmin/issues", "new_window": True},
+        {"model": "accounts.user"}
+    ],
+
+    # Side Menu
+    "show_sidebar": True,
+    "navigation_expanded": True,
+    "hide_apps": [],
+    "hide_models": [],
+    "order_with_respect_to": ["accounts", "courses", "payments", "analytics"],
+
+    # Icons
+    "icons": {
+        "accounts": "fas fa-users-cog",
+        "accounts.user": "fas fa-user",
+        "accounts.Group": "fas fa-users",
+        "courses": "fas fa-graduation-cap",
+        "courses.course": "fas fa-book",
+        "courses.category": "fas fa-tags",
+        "courses.enrollment": "fas fa-user-graduate",
+        "payments": "fas fa-credit-card",
+        "mobile_payments": "fas fa-mobile-alt",
+        "analytics": "fas fa-chart-line",
+        "notifications": "fas fa-bell",
+    },
+
+    # UI Tweaks
+    "custom_links": {
+        "courses": [{
+            "name": "Make Messages", 
+            "url": "make_messages", 
+            "icon": "fas fa-comments",
+            "permissions": ["courses.view_course"]
+        }]
+    },
+    "use_google_fonts_cdn": True,
+    "show_ui_builder": True,
+
+    "changeform_format": "horizontal_tabs",
+    "changeform_format_overrides": {"accounts.user": "collapsible", "accounts.group": "vertical_tabs"},
+    "language_chooser": False,
+}
+
+JAZZMIN_UI_TWEAKS = {
+    "navbar_small_text": False,
+    "footer_small_text": False,
+    "body_small_text": False,
+    "brand_small_text": False,
+    "brand_colour": "navbar-primary",
+    "accent": "accent-primary",
+    "navbar": "navbar-primary navbar-dark",
+    "no_navbar_border": False,
+    "navbar_fixed": False,
+    "layout_boxed": False,
+    "footer_fixed": False,
+    "sidebar_fixed": False,
+    "sidebar": "sidebar-dark-primary",
+    "sidebar_nav_small_text": False,
+    "sidebar_disable_expand": False,
+    "sidebar_nav_child_indent": False,
+    "sidebar_nav_compact_style": False,
+    "sidebar_nav_legacy_style": False,
+    "sidebar_nav_flat_style": False,
+    "theme": "default",
+    "dark_mode_theme": None,
+    "button_classes": {
+        "primary": "btn-primary",
+        "secondary": "btn-secondary",
+        "info": "btn-info",
+        "warning": "btn-warning",
+        "danger": "btn-danger",
+        "success": "btn-success"
+    }
 }
 
 # Logging Configuration

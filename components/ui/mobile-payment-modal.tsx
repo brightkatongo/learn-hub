@@ -93,9 +93,31 @@ export function MobilePaymentModal({ isOpen, onClose, course, onPaymentSuccess }
 
   const loadProviders = async () => {
     try {
-      const response = await fetch("/api/mobile-payments/providers/")
-      const data = await response.json()
-      setProviders(data)
+      // Mock providers data - replace with actual API call
+      const mockProviders = [
+        {
+          name: 'airtel',
+          display_name: 'Airtel Money',
+          ussd_code: '*778#',
+          phone_prefixes: ['097', '096', '095'],
+          instructions: 'Dial *778# > Send Money > Pay Bill > Enter Merchant Code > Enter Amount > Enter Reference > Confirm with PIN'
+        },
+        {
+          name: 'zamtel',
+          display_name: 'Zamtel Money',
+          ussd_code: '*776#',
+          phone_prefixes: ['095', '094'],
+          instructions: 'Dial *776# > Pay Bill > Enter Business Number > Enter Amount > Enter Reference > Confirm with PIN'
+        },
+        {
+          name: 'mtn',
+          display_name: 'MTN Money',
+          ussd_code: '*175#',
+          phone_prefixes: ['096', '097', '098'],
+          instructions: 'Dial *175# > Send Money > Pay Bill > Enter Payee Code > Enter Amount > Enter Reference > Confirm with PIN'
+        }
+      ]
+      setProviders(mockProviders)
     } catch (error) {
       toast({
         title: "Error",
@@ -106,16 +128,12 @@ export function MobilePaymentModal({ isOpen, onClose, course, onPaymentSuccess }
   }
 
   const validatePhoneNumber = async (phone: string) => {
-    try {
-      const response = await fetch("/api/mobile-payments/validate-phone/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone_number: phone }),
-      })
-      const data = await response.json()
-      return data
-    } catch (error) {
-      return { is_valid: false, error: "Validation failed" }
+    // Mock validation - replace with actual API call
+    const cleanPhone = phone.replace(/\D/g, '')
+    return {
+      is_valid: cleanPhone.length >= 9,
+      detected_provider: selectedProvider,
+      formatted_phone: phone
     }
   }
 
@@ -123,36 +141,44 @@ export function MobilePaymentModal({ isOpen, onClose, course, onPaymentSuccess }
     setIsLoading(true)
 
     try {
-      const response = await fetch("/api/mobile-payments/initiate/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify({
-          course_id: course.id,
-          provider: selectedProvider,
-          phone_number: phoneNumber,
-        }),
-      })
-
-      const data = await response.json()
-
-      if (response.ok) {
-        setTransaction(data.transaction)
-        setInstructions(data.instructions)
-        setStep("instructions")
-        toast({
-          title: "Payment Initiated",
-          description: "Follow the instructions to complete your payment",
-        })
-      } else {
-        throw new Error(data.error || "Payment initiation failed")
+      // Mock payment initiation - replace with actual API call
+      const mockTransaction = {
+        id: 'txn_' + Math.random().toString(36).substr(2, 9),
+        reference_code: Math.random().toString(36).substr(2, 8).toUpperCase(),
+        status: 'pending',
+        expires_at: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
+        amount: course.price,
+        currency: 'ZMW',
+        provider_name: providers.find(p => p.name === selectedProvider)?.display_name || ''
       }
+
+      const mockInstructions = {
+        steps: [
+          `Dial ${providers.find(p => p.name === selectedProvider)?.ussd_code} on your phone`,
+          "Select option 1: Send Money",
+          "Select option 2: Pay Bill",
+          "Enter Merchant Code: LEARNHUB001",
+          `Enter Amount: ${course.price}`,
+          `Enter Reference: ${mockTransaction.reference_code}`,
+          "Enter your PIN to confirm",
+          "Wait for confirmation SMS"
+        ],
+        ussd_code: providers.find(p => p.name === selectedProvider)?.ussd_code,
+        estimated_time: '2-3 minutes'
+      }
+
+      setTransaction(mockTransaction)
+      setInstructions(mockInstructions)
+      setStep("instructions")
+      
+      toast({
+        title: "Payment Initiated",
+        description: "Follow the instructions to complete your payment",
+      })
     } catch (error) {
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Payment initiation failed",
+        description: "Payment initiation failed",
         variant: "destructive",
       })
     } finally {
@@ -164,29 +190,19 @@ export function MobilePaymentModal({ isOpen, onClose, course, onPaymentSuccess }
     if (!transaction) return
 
     try {
-      const response = await fetch(`/api/mobile-payments/status/${transaction.reference_code}/`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      })
-      const data = await response.json()
-
-      if (data.status === "confirmed") {
+      // Mock status check - replace with actual API call
+      const mockStatus = Math.random() > 0.7 ? 'confirmed' : 'pending'
+      
+      if (mockStatus === 'confirmed') {
         onPaymentSuccess()
         onClose()
         toast({
           title: "Payment Successful!",
           description: "You now have access to the course",
         })
-      } else if (data.status === "failed" || data.status === "expired") {
-        toast({
-          title: "Payment Failed",
-          description: "Please try again or contact support",
-          variant: "destructive",
-        })
       }
 
-      setTransaction((prev) => (prev ? { ...prev, status: data.status } : null))
+      setTransaction(prev => prev ? { ...prev, status: mockStatus } : null)
     } catch (error) {
       console.error("Status check failed:", error)
     }
@@ -218,16 +234,7 @@ export function MobilePaymentModal({ isOpen, onClose, course, onPaymentSuccess }
     if (!validation.is_valid) {
       toast({
         title: "Invalid Phone Number",
-        description: "Please enter a valid Zambian phone number",
-        variant: "destructive",
-      })
-      return
-    }
-
-    if (validation.detected_provider !== selectedProvider) {
-      toast({
-        title: "Provider Mismatch",
-        description: `This number belongs to ${validation.detected_provider}, not ${selectedProvider}`,
+        description: "Please enter a valid phone number",
         variant: "destructive",
       })
       return
@@ -400,7 +407,7 @@ export function MobilePaymentModal({ isOpen, onClose, course, onPaymentSuccess }
                 <div className="flex items-center gap-2">
                   <code className="bg-white px-2 py-1 rounded text-lg font-mono">{transaction.reference_code}</code>
                   <Button size="sm" variant="outline" onClick={() => copyToClipboard(transaction.reference_code)}>
-                    <Copy className="h-4 w-4" />
+                    <Copy className="h-4  w-4" />
                   </Button>
                 </div>
               </div>
