@@ -48,7 +48,10 @@ LOCAL_APPS = [
     'mobile_payments',
     'analytics',
     'notifications',
-    'dashboard',  # New dashboard app
+    'dashboard',
+    'zambian_education',  # New app for Zambian education system
+    'ecz_papers',  # ECZ examination papers
+    'online_classes',  # Live online classes
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -238,31 +241,55 @@ MOBILE_MONEY_SETTINGS = {
     'SMS_USERNAME': config('SMS_USERNAME', default=''),
 }
 
+# Zambian Education System Configuration
+ZAMBIAN_EDUCATION_SETTINGS = {
+    'ECZ_API_BASE_URL': config('ECZ_API_BASE_URL', default='https://api.ecz.gov.zm/v1/'),
+    'ECZ_API_KEY': config('ECZ_API_KEY', default=''),
+    'MOE_API_BASE_URL': config('MOE_API_BASE_URL', default='https://api.moe.gov.zm/v1/'),
+    'MOE_API_KEY': config('MOE_API_KEY', default=''),
+    'CURRICULUM_STANDARDS': {
+        'PRIMARY': ['Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7'],
+        'SECONDARY': ['Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12'],
+        'SUBJECTS': {
+            'PRIMARY': ['English', 'Mathematics', 'Science', 'Social Studies', 'Creative Arts', 'Physical Education', 'Local Languages'],
+            'SECONDARY': ['English', 'Mathematics', 'Physics', 'Chemistry', 'Biology', 'Geography', 'History', 'Civic Education', 'Religious Education', 'Computer Studies', 'Business Studies', 'Accounting', 'Economics']
+        }
+    },
+    'ECZ_EXAMINATION_LEVELS': ['Grade 7', 'Grade 9', 'Grade 12'],
+    'ACADEMIC_CALENDAR': {
+        'TERM_1': {'start': '01-15', 'end': '04-15'},
+        'TERM_2': {'start': '05-01', 'end': '08-15'},
+        'TERM_3': {'start': '09-01', 'end': '12-15'}
+    }
+}
+
 # Debug Toolbar Configuration
 INTERNAL_IPS = [
     '127.0.0.1',
     'localhost',
 ]
 
-# Jazzmin Configuration for Modern Admin UI
+# Enhanced Jazzmin Configuration for Zambian Education Platform
 JAZZMIN_SETTINGS = {
-    "site_title": "LearnHub Admin",
-    "site_header": "LearnHub",
-    "site_brand": "LearnHub",
-    "site_logo": "images/logo.png",
-    "login_logo": "images/logo.png",
+    "site_title": "EduZambia Admin",
+    "site_header": "EduZambia - Zambian Education Platform",
+    "site_brand": "EduZambia",
+    "site_logo": "images/zambia-education-logo.png",
+    "login_logo": "images/zambia-education-logo.png",
     "login_logo_dark": None,
     "site_logo_classes": "img-circle",
-    "site_icon": "images/favicon.ico",
-    "welcome_sign": "Welcome to LearnHub Admin",
-    "copyright": "LearnHub Ltd",
-    "search_model": ["accounts.User", "courses.Course"],
+    "site_icon": "images/zambia-flag-icon.ico",
+    "welcome_sign": "Welcome to EduZambia Administration",
+    "copyright": "Ministry of Education - Republic of Zambia",
+    "search_model": ["accounts.User", "courses.Course", "ecz_papers.ECZPaper"],
     "user_avatar": None,
     
     # Top Menu
     "topmenu_links": [
         {"name": "Home", "url": "admin:index", "permissions": ["auth.view_user"]},
         {"name": "Dashboard", "url": "/admin/dashboard/", "permissions": ["auth.view_user"]},
+        {"name": "ECZ Papers", "url": "/admin/ecz_papers/", "permissions": ["auth.view_user"]},
+        {"name": "Online Classes", "url": "/admin/online_classes/", "permissions": ["auth.view_user"]},
         {"name": "Analytics", "url": "/admin/analytics/", "permissions": ["auth.view_user"]},
         {"model": "accounts.User"},
         {"app": "courses"},
@@ -270,7 +297,8 @@ JAZZMIN_SETTINGS = {
 
     # User Menu on the right side
     "usermenu_links": [
-        {"name": "Support", "url": "https://github.com/farridav/django-jazzmin/issues", "new_window": True},
+        {"name": "ECZ Portal", "url": "https://ecz.gov.zm", "new_window": True},
+        {"name": "Ministry of Education", "url": "https://moe.gov.zm", "new_window": True},
         {"model": "accounts.user"}
     ],
 
@@ -279,30 +307,39 @@ JAZZMIN_SETTINGS = {
     "navigation_expanded": True,
     "hide_apps": [],
     "hide_models": [],
-    "order_with_respect_to": ["accounts", "courses", "payments", "analytics"],
+    "order_with_respect_to": ["accounts", "zambian_education", "ecz_papers", "courses", "online_classes", "payments", "analytics"],
 
-    # Icons
+    # Icons with Zambian education theme
     "icons": {
         "accounts": "fas fa-users-cog",
-        "accounts.user": "fas fa-user",
+        "accounts.user": "fas fa-user-graduate",
         "accounts.Group": "fas fa-users",
+        "zambian_education": "fas fa-school",
+        "zambian_education.school": "fas fa-building",
+        "zambian_education.grade": "fas fa-layer-group",
+        "zambian_education.subject": "fas fa-book-open",
+        "ecz_papers": "fas fa-file-alt",
+        "ecz_papers.eczpaper": "fas fa-scroll",
+        "ecz_papers.pastpaper": "fas fa-history",
         "courses": "fas fa-graduation-cap",
-        "courses.course": "fas fa-book",
+        "courses.course": "fas fa-chalkboard-teacher",
         "courses.category": "fas fa-tags",
         "courses.enrollment": "fas fa-user-graduate",
+        "online_classes": "fas fa-video",
+        "online_classes.liveclass": "fas fa-broadcast-tower",
         "payments": "fas fa-credit-card",
         "mobile_payments": "fas fa-mobile-alt",
         "analytics": "fas fa-chart-line",
         "notifications": "fas fa-bell",
     },
 
-    # UI Tweaks
+    # UI Tweaks with Zambian colors
     "custom_links": {
-        "courses": [{
-            "name": "Make Messages", 
-            "url": "make_messages", 
-            "icon": "fas fa-comments",
-            "permissions": ["courses.view_course"]
+        "zambian_education": [{
+            "name": "ECZ Syllabus", 
+            "url": "ecz_syllabus", 
+            "icon": "fas fa-book",
+            "permissions": ["zambian_education.view_subject"]
         }]
     },
     "use_google_fonts_cdn": True,
@@ -318,15 +355,15 @@ JAZZMIN_UI_TWEAKS = {
     "footer_small_text": False,
     "body_small_text": False,
     "brand_small_text": False,
-    "brand_colour": "navbar-primary",
-    "accent": "accent-primary",
-    "navbar": "navbar-primary navbar-dark",
+    "brand_colour": "navbar-success",  # Green for Zambian flag
+    "accent": "accent-success",
+    "navbar": "navbar-success navbar-dark",  # Zambian green
     "no_navbar_border": False,
     "navbar_fixed": False,
     "layout_boxed": False,
     "footer_fixed": False,
     "sidebar_fixed": False,
-    "sidebar": "sidebar-dark-primary",
+    "sidebar": "sidebar-dark-success",  # Zambian theme
     "sidebar_nav_small_text": False,
     "sidebar_disable_expand": False,
     "sidebar_nav_child_indent": False,
@@ -336,13 +373,14 @@ JAZZMIN_UI_TWEAKS = {
     "theme": "default",
     "dark_mode_theme": None,
     "button_classes": {
-        "primary": "btn-primary",
+        "primary": "btn-success",  # Zambian green
         "secondary": "btn-secondary",
         "info": "btn-info",
         "warning": "btn-warning",
         "danger": "btn-danger",
         "success": "btn-success"
-    }
+    },
+    "actions_sticky_top": True
 }
 
 # Logging Configuration
@@ -353,7 +391,7 @@ LOGGING = {
         'file': {
             'level': 'INFO',
             'class': 'logging.FileHandler',
-            'filename': BASE_DIR / 'logs' / 'django.log',
+            'filename': BASE_DIR / 'logs' / 'eduzambia.log',
         },
         'console': {
             'level': 'INFO',
@@ -366,7 +404,17 @@ LOGGING = {
             'level': 'INFO',
             'propagate': True,
         },
-        'mobile_payments': {
+        'zambian_education': {
+            'handlers': ['file', 'console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'ecz_papers': {
+            'handlers': ['file', 'console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'online_classes': {
             'handlers': ['file', 'console'],
             'level': 'DEBUG',
             'propagate': True,
